@@ -2,85 +2,66 @@ import {
   Card,
   Page,
   Layout,
-  TextContainer,
-  Image,
-  Stack,
-  Link,
-  Heading,
+  Tabs,
+  Frame
 } from "@shopify/polaris";
-import { TitleBar } from "@shopify/app-bridge-react";
+import { useState, useCallback } from "react";
 
-import { trophyImage } from "../assets";
-
-import { ProductsCard } from "../components";
+// import ScriptTagWorkers from "../components/scriptTagActivate"
+import CustomJsInput from "../components/custom-js-input"
+import CustomMessageSection from "../components/custom-message"
 
 export default function HomePage() {
+
+  const [selected, setSelected] = useState(0);
+
+  const handleTabChange = useCallback(
+    (selectedTabIndex) => setSelected(selectedTabIndex),
+    []
+  );
+
+  const tabs = [
+    {
+      id: "jsCode",
+      content: "Custom JS code",
+      panelID: "pannel-0",
+    },
+    {
+      id: "messageSection",
+      content: "Message section",
+      panelID: "pannel-1",
+    },
+  ];
+
+  const tabPanels = [
+    (
+      <Card.Section id="0">
+        {/* <ScriptTagWorkers /> */}
+        <CustomJsInput />
+      </Card.Section>
+    ),
+    (
+      <Card.Section id="1">
+        <CustomMessageSection />
+      </Card.Section>
+    ),
+  ];
+
   return (
-    <Page narrowWidth>
-      <TitleBar title="App name" primaryAction={null} />
-      <Layout>
-        <Layout.Section>
-          <Card sectioned>
-            <Stack
-              wrap={false}
-              spacing="extraTight"
-              distribution="trailing"
-              alignment="center"
-            >
-              <Stack.Item fill>
-                <TextContainer spacing="loose">
-                  <Heading>Nice work on building a Shopify app 🎉</Heading>
-                  <p>
-                    Your app is ready to explore! It contains everything you
-                    need to get started including the{" "}
-                    <Link url="https://polaris.shopify.com/" external>
-                      Polaris design system
-                    </Link>
-                    ,{" "}
-                    <Link url="https://shopify.dev/api/admin-graphql" external>
-                      Shopify Admin API
-                    </Link>
-                    , and{" "}
-                    <Link
-                      url="https://shopify.dev/apps/tools/app-bridge"
-                      external
-                    >
-                      App Bridge
-                    </Link>{" "}
-                    UI library and components.
-                  </p>
-                  <p>
-                    Ready to go? Start populating your app with some sample
-                    products to view and test in your store.{" "}
-                  </p>
-                  <p>
-                    Learn more about building out your app in{" "}
-                    <Link
-                      url="https://shopify.dev/apps/getting-started/add-functionality"
-                      external
-                    >
-                      this Shopify tutorial
-                    </Link>{" "}
-                    📚{" "}
-                  </p>
-                </TextContainer>
-              </Stack.Item>
-              <Stack.Item>
-                <div style={{ padding: "0 20px" }}>
-                  <Image
-                    source={trophyImage}
-                    alt="Nice work on building a Shopify app"
-                    width={120}
-                  />
-                </div>
-              </Stack.Item>
-            </Stack>
-          </Card>
-        </Layout.Section>
-        <Layout.Section>
-          <ProductsCard />
-        </Layout.Section>
-      </Layout>
-    </Page>
+    <Page fullWidth>
+      <Frame>
+        <Layout>
+          <Layout.Section>
+            <div className="app-wrapper">
+              <Card>
+                <Tabs tabs={tabs} selected={selected} onSelect={handleTabChange}>
+                  {tabPanels[selected]}
+                </Tabs>
+              </Card>
+            </div>
+          </Layout.Section>
+        </Layout>
+      </Frame>
+    </Page >
   );
 }

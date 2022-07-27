@@ -1,6 +1,7 @@
 // @ts-check
 import { join } from "path";
-import fs from "fs";
+// import fs from "fs";
+import fs from "fs/promises";
 import express from "express";
 import cookieParser from "cookie-parser";
 import { Shopify, LATEST_API_VERSION } from "@shopify/shopify-api";
@@ -15,6 +16,9 @@ const USE_ONLINE_TOKENS = false;
 const TOP_LEVEL_OAUTH_COOKIE = "shopify_top_level_oauth";
 
 const PORT = parseInt(process.env.BACKEND_PORT || process.env.PORT, 10);
+
+const SCRIPT_TAG_URL = `${process.env.HOST}/web/frontend/assets/app-script.js`;
+const scriptFilePath = "script/app-script.js";
 
 // TODO: There should be provided by env vars
 const DEV_INDEX_PATH = `${process.cwd()}/frontend/`;
@@ -103,19 +107,43 @@ export async function createServer(
     })
   );
 
-  app.get("/api/products/count", async (req, res) => {
-    const session = await Shopify.Utils.loadCurrentSession(
-      req,
-      res,
-      app.get("use-online-tokens")
-    );
-    const { Product } = await import(
-      `@shopify/shopify-api/dist/rest-resources/${Shopify.Context.API_VERSION}/index.js`
-    );
+  // Get existing code from file
 
-    const countData = await Product.count({ session });
-    res.status(200).send(countData);
+  app.get("/api/get-code", async (req, res) => {
+    try {
+      const data = await fs.readFile(scriptFilePath, { encoding: "utf8" });
+      res.status(200).send(data);
+    } catch (err) {
+      res.status(500).send(err.message);
+    }
   });
+
+  // Write code to file
+
+  app.get("/api/write-code", async (req, res) => {
+    const content = decodeURIComponent(req.headers.data);
+    try {
+      await fs.writeFile(scriptFilePath, content);
+      res.status(200).send("Success");
+    } catch (err) {
+      res.status(500).send(err.message);
+    }
+  });
+
+//   app.get("/api/get-code", async (req, res) => {
+//     // const session = await Shopify.Utils.loadCurrentSession(
+//     //   req,
+//     //   res,
+//     //   app.get("use-online-tokens")
+//     // );
+//     // const { Product } = await import(
+//     //   `@shopify/shopify-api/dist/rest-resources/${Shopify.Context.API_VERSION}/index.js`
+//     // );
+// console.log(req);
+//     const countData = "await Product.count({ session })";
+//      res.status(200).send(countData);
+  
+//   });
 
   app.get("/api/products/create", async (req, res) => {
     const session = await Shopify.Utils.loadCurrentSession(
